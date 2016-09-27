@@ -2,9 +2,7 @@
 extern crate glium;
 
 use glium::{DisplayBuild, Surface};
-use glium::draw_parameters::DrawParameters;
-use glium::glutin::{Event, WindowBuilder};
-
+use glium::glutin::{Event, VirtualKeyCode, WindowBuilder};
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -14,18 +12,21 @@ struct Vertex {
 implement_vertex!(Vertex, position);
 
 fn main() {
+    // Create the window
     let display = WindowBuilder::new()
         .with_title("Mandelbrot Set".to_string())
         .with_dimensions(1024, 768)
         .build_glium()
         .unwrap();
 
+    // Compile the shaders
     let program = glium::Program::from_source(
         &display,
         include_str!("mandelbrot.glslv"),
         include_str!("mandelbrot.glslf"),
         None).unwrap();
 
+    // Render 2 triangles covering the whole screen
     let vertices = [
         // Top-left corner
         Vertex{ position: [-1.0,  1.0] },
@@ -50,13 +51,12 @@ fn main() {
                     &Default::default()).unwrap();
         target.finish().unwrap();
 
-        // Quit on Esc
         for event in display.poll_events() {
             match event {
-                Event::Closed => return,   // the window has been closed by the user
-                Event::KeyboardInput(press_state, _, key_code) => {
-                    return;
-                }
+                // the window has been closed by the user:
+                Event::Closed => return,
+                // Quit on Esc:
+                Event::KeyboardInput(_ , _, Some(VirtualKeyCode::Escape)) => return,
                 _ => ()
             }
         }
